@@ -1,0 +1,27 @@
+{
+  "name": "webapis",
+  "version": "1.0.0",
+  "description": "Practice with APIs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/muradkhan101/webAPIpractice.git"
+  },
+  "author": "",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/muradkhan101/webAPIpractice/issues"
+  },
+  "homepage": "https://github.com/muradkhan101/webAPIpractice#readme",
+  "dependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "webpack": "^3.8.1"
+  },
+  "devDependencies": {
+    "babel-preset-env": "^1.6.1"
+  }
+}
