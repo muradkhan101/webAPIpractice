@@ -2,8 +2,9 @@
   "name": "webapis",
   "version": "1.0.0",
   "description": "Practice with APIs",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
+    "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -19,6 +20,7 @@
   "dependencies": {
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
+    "express": "^4.16.2",
     "webpack": "^3.8.1"
   },
   "devDependencies": {
