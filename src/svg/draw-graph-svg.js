@@ -4,12 +4,24 @@ let width = 50;
 let height = 50;
 let padding = 10;
 
-function drawTree(tree) {
+// Graph is being drawn!
+// Just need to figure out collisions and spacing
+// Branches need to be aware of eachother somehow
+// Maybe if each subgraph is its own group
+// and subgraph are positioned relative to parent rather than root?
+// That way, repositioning can happen by just moving the first parent of colliding group
+
+function drawSvgTree(tree) {
     let svg = document.createElementNS(ns, 'svg');
-    setAtt(svg, 'width', '100%');
-    setAtt(svg, 'height', '100%');
+
+    let maxWidth = tree.getMaxWidth() * (width + padding);
+    let maxHeight = tree.getDepth() * (height + padding);
+    setAtt(svg, 'width', maxWidth * 2);
+    setAtt(svg, 'height', maxHeight);
+
     let g = document.createElementNS(ns, 'g');
-    setAtt(g, 'transform', 'translate(300,0)');
+    g.appendChild(makeNode(tree));
+    setAtt(g, 'transform', `translate(${[maxWidth / 2, 0].join(',')})`);
     drawSubTree(tree, g, g);
     svg.appendChild(g);
     return svg;
@@ -33,7 +45,7 @@ function makeNode(node) {
     let group = document.createElementNS(ns, 'g');
     let rect = document.createElementNS(ns, 'rect');
     setSize(
-        setAtt(rect, 'fill', '#313131'),
+        setAtt(rect, 'fill', 'rgba(0,0,0,0)'),
         width, height
     )
     group.appendChild(rect);
