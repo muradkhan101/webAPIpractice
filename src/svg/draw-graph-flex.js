@@ -1,5 +1,6 @@
 function drawTreeFlex(tree) {
     let {node, children} = makeNodeFlex(tree);
+    addClickListeners(node);
     createCssClasses();
     drawSubTreeFlex(tree, children, node);
     return node;
@@ -33,6 +34,7 @@ function addAttributes(node) {
 
 function addInfo(node, info) {
     let span = document.createElement('span');
+    span.classList.add('treeConnector');
     span.innerHTML = info;
     node.appendChild(span);
     return node;
@@ -48,8 +50,31 @@ function createCssClasses() {
     }
     .childs {
         display: flex;
-        justify-content: 'space-evenly';
+        justify-content: space-evenly;
         flex-grow: 1;
+    }
+    .treeConnector { display:block; position: relative; }
+    .treeConnector::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 1px;
+        background: #313131;
+    }
+    .hidden {
+        display: none;
     }`;
     document.querySelector('head').appendChild(style);
+}
+
+function addClickListeners(node) {
+    node.addEventListener('click', function(e) {
+        let t = event.target;
+        if (event.target.tagName === 'SPAN') {
+            t = t.parentElement;
+        }
+        t.querySelector('.childs').classList.toggle('hidden');
+    })
 }
