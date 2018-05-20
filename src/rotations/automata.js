@@ -24,11 +24,12 @@ function draw(rows, cols, damp) {
         }
     }
     
-    updateSquares(document.querySelector('.square'), current, cols);
+    updateSquares(document.querySelectorAll('.square'), current, cols);
 
     let temp = prev;
     prev = current;
     current = temp;
+    window.requestAnimationFrame(() => draw(rows, cols, damp));
 }
 
 function updateSquares(squares, current, cols) {
@@ -36,5 +37,15 @@ function updateSquares(squares, current, cols) {
         row.forEach((item, j) => {
             setTransform(squares[j + i * cols], current[i][j])
         })
+    })
+}
+
+function setUpListener() {
+    document.querySelector('.square-grid').addEventListener('click', (e) => {
+        let target = e.target;
+        let row = +target.getAttribute('row');
+        let col = +target.getAttribute('column');
+        current[row][col].x = 255;
+        current[row][col].y = 255;
     })
 }
