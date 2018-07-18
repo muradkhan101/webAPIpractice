@@ -4,6 +4,8 @@ function getLast(arr) {
         : undefined;
 }
 
+function reverse(arr) { return arr.map( (item, i) => arr[arr.length - 1 - i]); }
+
 // Some docs on what's going on because im not too sure either :P
 // http://dirk.jivas.de/papers/buchheim02improving.pdf
 // https://llimllib.github.io/pymag-trees/
@@ -119,4 +121,44 @@ function apportion(node, defaultAncestor, distance) {
         }
         return defaultAncestor;
     }
+}
+
+function moveSubtree(leftTree, rightTree, shift) {
+    let subtrees = rightTree.number - leftTree.number;
+    rightTree.change -= shift / subtrees;
+    rightTree.shift += shift;
+    leftTree.change += shift / subtrees;
+    rightTree.x += shift;
+    rightTree.offset += shift;
+}
+
+function executeShifts(node) {
+    let shift = change = 0;
+    for (let child of reverse(node.children)) {
+        child.x += shift;
+        child.offset += shift;
+        change += child.change;
+        shift += child.shift + change;
+    }
+}
+
+function ancestor(vil, node, defaultAncestor) {
+    if ( node.parent.children.indexOf(vil.ancestor) !== -1 ) {
+        return vil.ancestor;
+    } else {
+        return defaultAncestor;
+    }
+}
+
+function secondWalk(node, m = 0, depth = 0, min = null) {
+    node.x += m;
+    node.y = depth;
+
+    if (!min || node.x < min) 
+        min = node.x;
+    
+    for (let child of node.children) {
+        min = secondWalk(child, m + node.offset, depth + 1, min)
+    }
+    return min;
 }
