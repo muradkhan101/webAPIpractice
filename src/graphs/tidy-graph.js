@@ -13,7 +13,7 @@ function reverse(arr) { return arr.map( (item, i) => arr[arr.length - 1 - i]); }
 class DrawTree {
     constructor(tree, parent = null, depth = 0, number = 1) {
         this.x = -1;
-        this.y = depth * 10;
+        this.y = depth;
         this.tree = tree;
         this.children = tree.children.map((child, i) =>
             new DrawTree(child, this, depth + 1, i + 1))
@@ -50,16 +50,20 @@ class DrawTree {
 }
 
 function buchheim(tree) {
-    let dt = firstWalk(tree);
-    return secondWalk(tree);
+    let dt = firstWalk(new DrawTree(tree));
+    let min = secondWalk(dt);
+    if (min < 0) {
+        thirdWalk(dt, -min)
+    }
+    return dt;
 }
 
 function firstWalk(node, distance = 1) {
     if (node.children.length === 0) {
         if (node.getLeftMostSibling()) {
-            this.x = this.getLeftBrother().x + distance
+            node.x = node.getLeftBrother().x + distance
         } else {
-            this.x = 0;
+            node.x = 0;
         }
     } else {
         let defaultAncestor = node.children[0];
@@ -77,7 +81,7 @@ function firstWalk(node, distance = 1) {
             node.x = sibling.x + distance;
             node.mod = node.x - midpoint;
         } else {
-            this.x = midpoint;
+            node.x = midpoint;
         }
     }
     return node;
@@ -88,7 +92,7 @@ function apportion(node, defaultAncestor, distance) {
     if (sibling) {
         let vir = vor = node;
         let vil = sibling;
-        let vol = node.leftmostSibling();
+        let vol = node.getLeftMostSibling();
         let sir = sor = node.offset;
         let sil = vil.offset;
         let sol = vol.offset;
@@ -109,7 +113,7 @@ function apportion(node, defaultAncestor, distance) {
             sol += vol.offset;
             sor += vor.offset;
         }
-        if (vil.right() && vor.right()) {
+        if (vil.right() && !vor.right()) {
             vor.thread = vil.right();
             vor.offset += (sil - sor);
         } else {
@@ -117,14 +121,14 @@ function apportion(node, defaultAncestor, distance) {
                 vol.thread = vir.left();
                 vol.offset += (sir - sol);
             }
-            defaultAncestor = v;
+            defaultAncestor = node;
         }
         return defaultAncestor;
     }
 }
 
 function moveSubtree(leftTree, rightTree, shift) {
-    let subtrees = rightTree.number - leftTree.number;
+    let subtrees = rightTree.siblingNumber - leftTree.siblingNumber;
     rightTree.change -= shift / subtrees;
     rightTree.shift += shift;
     leftTree.change += shift / subtrees;
@@ -143,6 +147,9 @@ function executeShifts(node) {
 }
 
 function ancestor(vil, node, defaultAncestor) {
+    console.log('VIL', vil);
+    console.log('NODE', node);
+    console.log('DEFAILT', defaultAncestor)
     if ( node.parent.children.indexOf(vil.ancestor) !== -1 ) {
         return vil.ancestor;
     } else {
@@ -161,4 +168,57 @@ function secondWalk(node, m = 0, depth = 0, min = null) {
         min = secondWalk(child, m + node.offset, depth + 1, min)
     }
     return min;
+}
+
+function thirdWalk(tree, n) {
+    tree.x += n;
+    for (let child of tree.children) {
+        thirdWalk(child, n);
+    }
+}
+
+function drawTree(rootEl, tree, depth) {
+    rootEl.appendChild( makeNode(tree) );
+    for (let child of tree.children) {
+        drawTree(rootEl, child, depth + 1);
+    }
+}
+
+function drawConnections(tree, depth) {
+
+}
+
+function defaultAddContent(content) {
+    let el = document.createElement('span');
+    el.innerText = content;
+    return el;
+}
+
+let nodeHeight = 25;
+let nodeWidth = 40;
+
+function makeNode(node, addContent = defaultAddContent) {
+    console.log('NODE:', node);
+    let el = document.createElement('div');
+    let styles = el.style;
+    styles.position = 'absolute';
+    styles.top = node.y * nodeHeight + 'px';
+    styles.left = node.x * nodeWidth + 'px';
+
+    el.appendChild( addContent(`${node.x, node.y}`));
+    return el;
+}
+
+function randInt(min, max) {
+    return Math.floor(Math.random() * (max - min) - min);
+}
+
+function treeGen() {
+    let children = [];
+    for (let i = 0; i < randInt(0, 9); i++) {
+        if (Math.random() > 0.6) {
+            children.push(treeGen());
+        }
+    }
+    return { children };
 }
