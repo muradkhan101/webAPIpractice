@@ -123,8 +123,8 @@ function apportion(node, defaultAncestor, distance) {
             }
             defaultAncestor = node;
         }
-        return defaultAncestor;
     }
+    return defaultAncestor;
 }
 
 function moveSubtree(leftTree, rightTree, shift) {
@@ -147,9 +147,6 @@ function executeShifts(node) {
 }
 
 function ancestor(vil, node, defaultAncestor) {
-    console.log('VIL', vil);
-    console.log('NODE', node);
-    console.log('DEFAILT', defaultAncestor)
     if ( node.parent.children.indexOf(vil.ancestor) !== -1 ) {
         return vil.ancestor;
     } else {
@@ -198,14 +195,13 @@ let nodeHeight = 25;
 let nodeWidth = 40;
 
 function makeNode(node, addContent = defaultAddContent) {
-    console.log('NODE:', node);
     let el = document.createElement('div');
     let styles = el.style;
     styles.position = 'absolute';
     styles.top = node.y * nodeHeight + 'px';
     styles.left = node.x * nodeWidth + 'px';
 
-    el.appendChild( addContent(`${node.x, node.y}`));
+    el.appendChild( addContent(`${node.x}, ${node.y}`));
     return el;
 }
 
