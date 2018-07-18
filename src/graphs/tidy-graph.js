@@ -1,6 +1,16 @@
+function getLast(arr) {
+    return arr.length
+        ? arr[arr.length - 1]
+        : undefined;
+}
+
+// Some docs on what's going on because im not too sure either :P
+// http://dirk.jivas.de/papers/buchheim02improving.pdf
+// https://llimllib.github.io/pymag-trees/
+
 class DrawTree {
     constructor(tree, parent = null, depth = 0, number = 1) {
-        this.x = 0;
+        this.x = -1;
         this.y = depth * 10;
         this.tree = tree;
         this.children = tree.children.map((child, i) =>
@@ -12,6 +22,12 @@ class DrawTree {
         this.change = this.shift = 0;
         this.leftmostSibling = null;
         this.siblingNumber = number;
+    }
+    left() {
+        return this.thread || (this.children.length && this.children[0])
+    }
+    right() {
+        return this.thread || (getLast(this.children))
     }
     getLeftBrother() {
         let leaf = null;
@@ -51,7 +67,7 @@ function firstWalk(node, distance = 1) {
         }
         executeShifts(node)
         let ell = node.children[0];
-        let arr = node.children[ node.children.length - 1];
+        let arr = getLast(node.children);
 
         let midpoint = (ell.x + arr.x) / 2;
         let sibling = node.getLeftBrother();
@@ -68,6 +84,39 @@ function firstWalk(node, distance = 1) {
 function apportion(node, defaultAncestor, distance) {
     let sibling = node.getLeftBrother();
     if (sibling) {
-        
+        let vir = vor = node;
+        let vil = sibling;
+        let vol = node.leftmostSibling();
+        let sir = sor = node.offset;
+        let sil = vil.offset;
+        let sol = vol.offset;
+        while (vil.right() &&  vir.left()) {
+            vil = vil.right();
+            vir = vir.left();
+            vol = vol.left();
+            vor = vor.right();
+            vor.ancestor = node;
+            shift = (vil.x + sil) - (vir.x + sir) + distance;
+            if (shift > 0) {
+                moveSubtree(ancestor(vil, node, defaultAncestor), node, shift);
+                sir = sir + shift;
+                sor = sor + shift;
+            }
+            sil += vil.offset;
+            sir += vir.offset;
+            sol += vol.offset;
+            sor += vor.offset;
+        }
+        if (vil.right() && vor.right()) {
+            vor.thread = vil.right();
+            vor.offset += (sil - sor);
+        } else {
+            if (vir.left() && !vol.left()) {
+                vol.thread = vir.left();
+                vol.offset += (sir - sol);
+            }
+            defaultAncestor = v;
+        }
+        return defaultAncestor;
     }
 }
