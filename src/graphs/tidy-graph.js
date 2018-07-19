@@ -12,9 +12,11 @@ function reverse(arr) { return arr.map( (item, i) => arr[arr.length - 1 - i]); }
 
 class DrawTree {
     constructor(tree, parent = null, depth = 0, number = 1) {
+        console.log(tree);
         this.x = -1;
         this.y = depth;
         this.tree = tree;
+        this.width = tree.width;
         this.children = tree.children.map((child, i) =>
             new DrawTree(child, this, depth + 1, i + 1))
         this.parent = parent;
@@ -200,21 +202,23 @@ function makeNode(node, addContent = defaultAddContent) {
     styles.position = 'absolute';
     styles.top = node.y * nodeHeight + 'px';
     styles.left = node.x * nodeWidth + 'px';
-
+    styles.border = '1px solid grey';
     el.appendChild( addContent(`${node.x}, ${node.y}`));
     return el;
 }
 
 function randInt(min, max) {
-    return Math.floor(Math.random() * (max - min) - min);
+    return Math.floor(Math.random() * (max - min) + min);
 }
 
 function treeGen() {
     let children = [];
     for (let i = 0; i < randInt(0, 9); i++) {
-        if (Math.random() > 0.6) {
-            children.push(treeGen());
+        if (Math.random() > 0.5) {
+            let tree = treeGen();
+            tree.width = randInt(20, 50);
+            children.push(tree);
         }
     }
-    return { children };
+    return { children, width: randInt(20, 50)};
 }
