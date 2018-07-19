@@ -53,13 +53,30 @@ class Node {
 function getRandInt(max, min = 0) {
     return Math.floor(Math.random() * (max - min)) + min;
 }
-function generateRandomTree(size = 20) {
-    let nodes = [ ];
+function generateRandomTree(size = 20, deep = false) {
+    let nodes = [];
     nodes.push(new Node('s'));
-    for (let i = 0; i < size; i++) {
-        let newNode = new Node(i);
-        nodes[ getRandInt(nodes.length) ].addChild(newNode);
-        nodes.push(newNode);
+    if (deep) {
+        nodes[0].addChild(new Node('-1'));
+        for (let i = 0; i < size; i++) {
+            let depth = nodes[0].getDepth();
+            let level = getRandInt(depth, depth / 1.5);
+            let currentDepth = 0;
+            let toAdd = nodes[0];
+            while (currentDepth < level) {
+                let childrenCount = toAdd.children.length;
+                let newChild = toAdd.children[getRandInt(childrenCount - 1)];
+                toAdd = newChild ? newChild : toAdd;
+                currentDepth++;
+            }
+            toAdd.addChild(new Node(i));
+        }
+    } else {
+        for (let i = 0; i < size; i++) {
+            let newNode = new Node(i);
+            nodes[ getRandInt(nodes.length) ].addChild(newNode);
+            nodes.push(newNode);
+        }
     }
     return nodes[0];
 }

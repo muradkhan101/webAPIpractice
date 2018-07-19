@@ -1,15 +1,19 @@
-function drawTreeFlex(tree) {
+function drawTreeFlex(tree, randHeight = false) {
     let {node, children} = makeNodeFlex(tree);
     addClickListeners(node);
     createCssClasses();
-    drawSubTreeFlex(tree, children, node);
+    drawSubTreeFlex(tree, children, node, randHeight);
     return node;
 }
 
-function drawSubTreeFlex(tree, parent, root) {
+function drawSubTreeFlex(tree, parent, root, randHeight = false) {
     tree.children.forEach( (child, i) => {
         let {node, children} = makeNodeFlex(child);
-        drawSubTreeFlex(child, children, root);
+        drawSubTreeFlex(child, children, root, randHeight);
+        if (randHeight) {
+            let info = node.querySelector('.treeConnector');
+            info.style.height = getRandInt(55, 25) + 'px';
+        }
         parent.appendChild(node);
     });
 }
