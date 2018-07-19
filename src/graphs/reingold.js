@@ -83,7 +83,7 @@ function separate(tree, i, iyl) {
             }
             if (minContRight >= minContLeft) {
                 contourLeft = nextLeftContour(contourLeft);
-                if (contourLeft) minContLeft += contourLeft.mod;
+                if (contourLeft) sumModLeft += contourLeft.mod;
             }
     }
     if (!contourRight && contourLeft)
@@ -100,7 +100,7 @@ function moveSubtree(tree, i, iylIndex, dist) {
 }
 
 function nextLeftContour(tree) {
-    return tree.chilren.length === 0
+    return tree.children.length === 0
         ? tree.leftThread
         : tree.children[0];
 }
@@ -143,7 +143,7 @@ function positionRoot(tree) {
         + last.mod
         + last.prelim
         + last.width / 2
-        - tree.width / 2
+        - first.width / 2
     );
 }
 
@@ -187,4 +187,47 @@ class IYL {
 function updateIYL(minY, i, iyl) {
     while (iyl && minY >= iyl.lowY) iyl = iyl.next;
     return new IYL(minY, i, iyl);
+}
+
+// Rendering stuff
+
+function treeGen(depth = 0) {
+    let width = randInt(20, 125);
+    let height = 50;
+    let children = [];
+    for (let i = 0; i < randInt(0, 9); i++) {
+        if (Math.random() > 0.55) {
+            let tree = treeGen(depth + 1);
+            children.push(tree);
+        }
+    }
+    return new Tree(width, height, depth, children);
+}
+
+function defaultAddContent(content) {
+    let el = document.createElement('span');
+    el.innerText = content;
+    return el;
+}
+
+function makeNode(node, top = 0, addContent = defaultAddContent) {
+    let el = document.createElement('div');
+    let styles = el.style;
+    styles.position = 'absolute';
+    styles.top = top + 'px';
+    styles.left = node.x + 'px';
+    styles.width = node.width + 'px';
+    styles.height = node.height + 'px';
+    styles.border = '1px solid grey';
+    el.appendChild(addContent(`${node.x}, ${node.y}`));
+    return el;
+}
+function randInt(min, max) {
+    return Math.floor(Math.random() * (max - min) + min);
+}
+function drawTree(rootEl, tree, top = 0) {
+    rootEl.appendChild(makeNode(tree, top));
+    for (let child of tree.children) {
+        drawTree(rootEl, child, top + child.height);
+    }
 }
