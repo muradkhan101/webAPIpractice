@@ -10,8 +10,9 @@ class Tree {
         this.height = height;
         this.x = 0;
         this.y = y;
-        this.children = children;
 
+        this.children = children;
+        
         this.shift = 0;
         this.change = 0;
         this.mod = 0;
@@ -78,7 +79,8 @@ function separate(tree, i, iyl) {
         // If the rightContour's bottom is lower than the lowest sibling Y, advance pointer?
         if (bottom(rightContour) > iyl.lowY) iyl = iyl.next;
         // Distance between left sibling and current
-        let dist = (modRightContour + rightContour.prelim + rightContour.width) - (modLeftContour + leftContour.prelim);
+        let dist = (modRightContour + rightContour.prelim + rightContour.width)
+            - (modLeftContour + leftContour.prelim);
         // If left tree is more to the right than the right tree
         if (dist > 0) {
             modLeftContour += dist;
@@ -205,8 +207,8 @@ function updateIYL(minY, i, iyl) {
 // Rendering stuff
 
 function treeGen(depth = 0) {
-    let width = randInt(20, 125);
-    let height = 50;
+    let width = randInt(20, 125) + 16;
+    let height = 50 + 16;
     let children = [];
     for (let i = 0; i < randInt(0, 9); i++) {
         if (Math.random() > 0.55) {
@@ -217,8 +219,16 @@ function treeGen(depth = 0) {
     return new Tree(width, height, depth, children);
 }
 
-function defaultAddContent(content) {
-    let el = document.createElement('span');
+function defaultAddContent(content, hasChildren, margin = 8) {
+    let el = document.createElement('div');
+    let styles = el.style;
+    styles.position = 'relative';
+    styles.border = '1px solid grey';
+    styles.margin = `${margin}px`;
+
+    let minusHeight = margin * 2 + 16;
+    styles.height = `calc(100% - ${minusHeight}px)`;
+    styles.top = '16px';
     el.innerText = content;
     return el;
 }
@@ -231,10 +241,69 @@ function makeNode(node, top = 0, addContent = defaultAddContent) {
     styles.left = node.x + 'px';
     styles.width = node.width + 'px';
     styles.height = node.height + 'px';
-    styles.border = '1px solid grey';
+
     el.appendChild(addContent(`${node.x}, ${node.y}`));
+    node.htmlEl = el;
     return el;
 }
+
+function makeConnector(node) {
+    function makeBottomLine(node) {
+        let bottomLine = document.createElement('div');
+        bottomLine.style.width = '1px';
+        bottomLine.style.height = '16px';
+        bottomLine.style.background = 'black';
+        bottomLine.style.position = 'relative';
+        bottomLine.style.top = '8px';
+        node.htmlEl.appendChild(bottomLine);
+    }
+    function makeWideLine(node) {
+        let parent = node.htmlEl.getBoundingClientRect();
+        let leftChild = node.children[0].htmlEl.getBoundingClientRect();
+        let rightChild = getLast(node.children).htmlEl;
+
+        let leftStart = leftChild.left + leftChild.width / 2;
+        let rightEnd = rightChild.left + rightChild.width / 2;
+
+        let div = document.createElement('div');
+        let styles = div.style;
+        styles.position = 'relative';
+        styles.bottom = '-8px';
+        styles.left = ( leftStart - parent.left ) + 'px';
+        styles.width = (rightEnd - leftStart) + 'px';
+        styles.height = '1px';
+        styles.background = 'black';
+        node.htmlEl.appendChild(div);
+        return div;
+    }
+    function makeChildPointers(node, wideLine) {
+        let pointers = document.createElement('div');
+        let styles = pointers.style;
+        styles.position = 'relative';
+        styles.width = wideLine.offsetWidth + 'px';
+        styles.left = wideLine.style.left;
+        styles.top = '8px';
+        let wideLineBox = wideLine.getBoundingClientRect();
+        for (let i = 0; i < node.children.length; i++) {
+            let child = node.children[i].htmlEl.getBoundingClientRect();
+            let start = child.left + child.width / 2;
+            let pointer = document.createElement('div');
+            pointer.style.position = 'absolute';
+            pointer.style.width = '1px';
+            pointer.style.height = '8px';
+            pointer.style.background = 'black';
+            pointer.style.left = (start - wideLineBox.left) + 'px';
+            pointers.appendChild(pointer);
+        }
+        node.htmlEl.appendChild(pointers);
+    }
+    if (node.children.length) {
+        makeBottomLine(node);
+        let line = makeWideLine(node);
+        makeChildPointers(node, line);
+    }
+}
+
 function randInt(min, max) {
     return Math.floor(Math.random() * (max - min) + min);
 }
@@ -243,4 +312,16 @@ function drawTree(rootEl, tree, top = 0) {
     for (let child of tree.children) {
         drawTree(rootEl, child, top + child.height);
     }
+}
+function drawConnectors(tree) {
+    if (tree.children.length) {
+        makeConnector(tree);
+    }
+    for (let child of tree.children) {
+        drawConnectors(child);
+    }
+}
+function renderTree(rootEl, tree) {
+    drawTree(rootEl, tree);
+    drawConnectors(tree);
 }
