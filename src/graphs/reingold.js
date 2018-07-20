@@ -42,12 +42,19 @@ function firstWalk(tree) {
         firstWalk(tree.children[i]);
         let minY = bottom(tree.children[i].exRight);
         separate(tree, i, iyl);
+        // Generate linked list of siblings
         iyl = updateIYL(minY, i, iyl);
     }
+    // Position parent X based on location of children
     positionRoot(tree);
     setExtremes(tree);
 }
 
+/*
+ * @description - Sets leftmost and rightmost children on parent
+ *                and saves their current mod value
+ * 
+*/
 function setExtremes(tree) {
     if (tree.children.length === 0) {
         tree.exLeft = tree;
@@ -63,33 +70,37 @@ function setExtremes(tree) {
 }
 
 function separate(tree, i, iyl) {
-    let contourRight = tree.children[i - 1];
-    let sumModRight = contourRight.mod;
-    let contourLeft = tree.children[i];
-    let sumModLeft = contourLeft.mod;
-    while (contourRight && contourLeft) {
-        if (bottom(contourRight) > iyl.lowY) iyl = iyl.next;
-        let dist = (sumModRight + contourRight.prelim + contourRight.width) - (sumModLeft + contourLeft.prelim);
+    let rightContour = tree.children[i - 1];
+    let modRightContour = rightContour.mod;
+    let leftContour = tree.children[i];
+    let modLeftContour = leftContour.mod;
+    while (rightContour && leftContour) {
+        // If the rightContour's bottom is lower than the lowest sibling Y, advance pointer?
+        if (bottom(rightContour) > iyl.lowY) iyl = iyl.next;
+        // Distance between left sibling and current
+        let dist = (modRightContour + rightContour.prelim + rightContour.width) - (modLeftContour + leftContour.prelim);
+        // If left tree is more to the right than the right tree
         if (dist > 0) {
-            sumModLeft += dist;
+            modLeftContour += dist;
+            // Move the curre
             moveSubtree(tree, i, iyl.index, dist);
         }
-        let minContRight = bottom(contourRight),
-            minContLeft  = bottom(contourLeft);
+        let leftBottom = bottom(leftContour),
+            rightBottom  = bottom(rightContour);
         
-            if (minContRight <= minContLeft) {
-                contourRight = nextRightContour(contourRight);
-                if (contourRight) sumModRight += contourRight.mod;
-            }
-            if (minContRight >= minContLeft) {
-                contourLeft = nextLeftContour(contourLeft);
-                if (contourLeft) sumModLeft += contourLeft.mod;
-            }
+        if (rightBottom <= leftBottom) {
+            rightContour = nextRightContour(rightContour);
+            if (rightContour) modRightContour += rightContour.mod;
+        }
+        if (rightBottom <= leftBottom) {
+            leftContour = nextLeftContour(leftContour);
+            if (leftContour) modLeftContour += leftContour.mod;
+        }
     }
-    if (!contourRight && contourLeft)
-        setLeftThread(tree, i, contourLeft, sumModLeft);
-    else if (contourRight && !contourLeft)
-        setRightThread(tree, i, contourRight, sumModRight);
+    if (!rightContour && leftContour)
+        setLeftThread(tree, i, leftContour, modLeftContour);
+    else if (rightContour && !leftContour)
+        setRightThread(tree, i, rightContour, modRightContour);
 }
 
 function moveSubtree(tree, i, iylIndex, dist) {
@@ -115,26 +126,29 @@ function bottom(tree) {
     return tree.y + tree.height;
 }
 
-function setLeftThread(tree, i, contourLeft, sumModLeft) {
+function setLeftThread(tree, i, contourLeft, modLeftContour) {
     let exLeft = tree.children[0].exLeft;
     exLeft.leftThread = contourLeft;
-    let diff = (sumModLeft - contourLeft.mod) - tree.children[0].modLeft;
+    let diff = (modLeftContour - contourLeft.mod) - tree.children[0].modLeft;
     exLeft.mod += diff;
     exLeft.prelim -= diff;
     tree.children[0].exLeft = tree.children[i].exLeft;
     tree.children[0].modLeft = tree.children[i - 1].modLeft;
 }
 
-function setRightThread(tree, i, contourRight, sumModRight) {
+function setRightThread(tree, i, contourRight, modRightContour) {
     let exRight = tree.children[i].exRight;
     exRight.rightThread = contourRight;
-    let diff = ( sumModRight - contourRight.mod ) - tree.children[i].modRight;
+    let diff = ( modRightContour - contourRight.mod ) - tree.children[i].modRight;
     exRight.mod += diff;
     exRight.prelim -= diff;
     tree.children[i].exRight = tree.children[i - 1].exRight;
     tree.children[i].modRight = tree.children[i - 1].modRight;
 }
-
+/*
+ * @params tree
+ * description: Centers an element over its children
+*/
 function positionRoot(tree) {
     let first = tree.children[0];
     let last = getLast(tree.children);
@@ -142,9 +156,8 @@ function positionRoot(tree) {
         + first.mod
         + last.mod
         + last.prelim
-        + last.width / 2
-        - first.width / 2
-    );
+        + last.width
+    ) / 2 - t.width / 2;
 }
 
 function secondWalk(tree, mod) {
@@ -158,7 +171,7 @@ function secondWalk(tree, mod) {
 
 function distributeExtra(tree, i, iylIndex, dist) {
     if (iylIndex != i - 1) {
-        let nr = i - si;
+        let nr = i - iylIndex;
         tree.children[iylIndex + 1].shift += dist / nr;
         tree.children[i].shift -= dist / nr;
         tree.children[i].change -= dist - dist / nr;
