@@ -46,16 +46,32 @@ function addInfo(node, info) {
     return node;
 }
 
-function drawConnectors(node) {
-    let childs = node.querySelector('.childs')
+function drawConnectors(node, depth = 0) {
+    let childs = node.querySelector('.childs');
+    if (depth > 0) {
+        node.insertBefore(makeNodeTopExtender(), node.querySelector('.content'));
+    }
     if (childs.children.length) {
-        drawConnector(node, childs);
+        let wideLine = makeWideLine(node, childs);
+        node.insertBefore(wideLine, childs);
+        let bottomLine = makeNodeBottomExtender(node, wideLine);
+        node.insertBefore(bottomLine, wideLine);
         Array.prototype.forEach.call(childs.children,
-            (child) => drawConnectors(child)
+            (child) => drawConnectors(child, depth + 1)
         );
     }
 }
-function drawConnector(node, childs) {
+function makeNodeBottomExtender() {
+    let line = document.createElement('div');
+    line.classList.add('bottomConnector');
+    return line;
+}
+function makeNodeTopExtender() {
+    let line = document.createElement('div');
+    line.classList.add('topConnector');
+    return line;
+}
+function makeWideLine(node, childs) {
     let span = document.createElement('span');
     span.classList.add('treeConnector');
     let parent = node.getBoundingClientRect();
@@ -67,7 +83,7 @@ function drawConnector(node, childs) {
     let moveLeft = (fChild.left + fChild.width / 2) - parent.left;
     span.style.left = moveLeft + 'px';
     span.style.width = width + 'px';
-    node.insertBefore(span, childs);
+    return span;
 }
 
 function createCssClasses() {
@@ -87,6 +103,7 @@ function createCssClasses() {
         border: 1px solid grey;
         display: inline-block;
         padding: 12px 16px;
+        margin: 8px 4px;
     }
     .treeConnector { display: block; position: relative; }
     .treeConnector::after {
@@ -98,6 +115,20 @@ function createCssClasses() {
         height: 1px;
         background: #313131;
     }
+    .bottomConnector {
+        width: 1px;
+        height: 16px;
+        background: black;
+        margin: 0px auto;
+    }
+    .topConnector {
+        width: 1px;
+        height: 16px;
+        position: relative;
+        background: black;
+        margin: 0 auto;
+        top: -8px;
+    }
     .hidden {
         display: none;
     }`;
@@ -107,15 +138,17 @@ function createCssClasses() {
 function addClickListeners(node) {
     node.addEventListener('click', function(e) {
         let t = event.target;
-        if (event.target.tagName === 'SPAN') {
+        let childs = t.querySelector('.childs');
+        while (!childs) {
             t = t.parentElement;
+            childs = t.querySelector('.childs')
         }
         t.querySelector('.childs').classList.toggle('hidden');
     })
 }
 
 function findDeepest(root, deepest = -Infinity, depth = 0) {
-    let childs = root.querySelector('childs');
+    let childs = root.querySelector('.childs');
     let deepestNode;
     if (depth > deepest) {
         deepestNode = root;
@@ -131,8 +164,26 @@ function findDeepest(root, deepest = -Infinity, depth = 0) {
     return { node: deepestNode, nodeDepth: deepest }
 }
 
+function findMostRight(root, farthest = -Infinity, node = root) {
+    let childs = root.querySelector('.childs');
+    let box = root.getBoundingClientRect();
+    if (box.left + box.width > farthest) {
+        farthest = box.left + box.width;
+        node = root;
+    }
+    Array.from(childs.children)
+        .forEach((child) => {
+            let { node: farthestNode, distance } = findMostRight(child, farthest, node);
+            if (distance > farthest) {
+                node = farthestNode;
+                farthest = distance
+            }
+        })
+    return { node: node, distance: farthest }
+}
+
 function findNodeAtDepth(root, depth, currentDepth = 0) {
-    let childs = root.querySelector('childs');
+    let childs = root.querySelector('.childs');
     if (depth === currentDepth) {
         return root;
     } else if (childs) {
