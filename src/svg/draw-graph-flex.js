@@ -13,7 +13,7 @@ function drawSubTreeFlex(tree, parent, root, randHeight = false) {
         let {node, children} = makeNodeFlex(child);
         drawSubTreeFlex(child, children, root, randHeight);
         if (randHeight) {
-            let info = node.querySelector('.content');
+            let info = node.querySelector('.graph-content');
             info.style.height = getRandInt(55, 25) + 'px';
         }
         parent.appendChild(node);
@@ -41,7 +41,7 @@ function addAttributes(node) {
 function addInfo(node, info) {
     let div = document.createElement('div');
     div.innerHTML = info;
-    div.classList.add('content');
+    div.classList.add('graph-content');
     node.appendChild(div);
     return node;
 }
@@ -49,11 +49,12 @@ function addInfo(node, info) {
 function drawConnectors(node, depth = 0) {
     let childs = node.querySelector('.childs');
     if (depth > 0) {
-        node.insertBefore(makeNodeTopExtender(), node.querySelector('.content'));
+        node.insertBefore(makeNodeTopExtender(), node.querySelector('.graph-content'));
     }
     if (childs.children.length) {
         let wideLine = makeWideLine(node, childs);
         node.insertBefore(wideLine, childs);
+        updateWideLine(node);
         let bottomLine = makeNodeBottomExtender(node, wideLine);
         node.insertBefore(bottomLine, wideLine);
         Array.prototype.forEach.call(childs.children,
@@ -71,19 +72,25 @@ function makeNodeTopExtender() {
     line.classList.add('topConnector');
     return line;
 }
-function makeWideLine(node, childs) {
+function makeWideLine(node) {
     let span = document.createElement('span');
     span.classList.add('treeConnector');
-    let parent = node.getBoundingClientRect();
-
-    let children = childs.children;
-    let fChild = children[0].getBoundingClientRect();
-    let lChild = children[children.length - 1].getBoundingClientRect();
-    let width = Math.abs((lChild.left + lChild.width / 2) - (fChild.left + fChild.width / 2));
-    let moveLeft = (fChild.left + fChild.width / 2) - parent.left;
-    span.style.left = moveLeft + 'px';
-    span.style.width = width + 'px';
     return span;
+}
+
+function updateWideLine(node) {
+    let line = node.querySelector('.treeConnector');
+    if (line) {
+        let children = node.querySelector('.childs').children;
+        let parent = node.getBoundingClientRect();
+    
+        let fChild = children[0].getBoundingClientRect();
+        let lChild = children[children.length - 1].getBoundingClientRect();
+        let width = Math.abs((lChild.left + lChild.width / 2) - (fChild.left + fChild.width / 2));
+        let moveLeft = (fChild.left + fChild.width / 2) - parent.left;
+        line.style.left = moveLeft + 'px';
+        line.style.width = width + 'px';
+    }
 }
 
 function createCssClasses() {
@@ -99,11 +106,12 @@ function createCssClasses() {
         justify-content: space-evenly;
         flex-grow: 1;
     }
-    .content {
+    .graph-content {
         border: 1px solid grey;
         display: inline-block;
         padding: 12px 16px;
         margin: 8px 4px;
+        color: purple;
     }
     .treeConnector { display: block; position: relative; }
     .treeConnector::after {
@@ -113,19 +121,19 @@ function createCssClasses() {
         left: 0;
         width: 100%;
         height: 1px;
-        background: #313131;
+        background: purple;
     }
     .bottomConnector {
         width: 1px;
         height: 16px;
-        background: black;
+        background: purple;
         margin: 0px auto;
     }
     .topConnector {
         width: 1px;
         height: 16px;
         position: relative;
-        background: black;
+        background: purple;
         margin: 0 auto;
         top: -8px;
     }
@@ -144,6 +152,14 @@ function addClickListeners(node) {
             childs = t.querySelector('.childs')
         }
         t.querySelector('.childs').classList.toggle('hidden');
+    })
+    window.addEventListener('resize', function(e) {
+        function updateLines(node) {
+            updateWideLine(node);
+            let children = node.querySelector('.childs').children;
+            Array.from(children).forEach(child => updateLines(child));
+        }
+        updateLines(node);
     })
 }
 
@@ -194,3 +210,4 @@ function findNodeAtDepth(root, depth, currentDepth = 0) {
     }
     return null
 }
+
