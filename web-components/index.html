@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        
+        <meta name="viewport" content="width=device-width">
+        
+        
+        <title>Web Components</title>
+        <link rel="stylesheet" href="./index.css">
+    </head>
+    <body>
+        <h1>Web Components Basic Examples</h1>
+        <section>
+            <h3>Custom Element Only, no shadow DOM or templates</h3>
+            <custom-element></custom-element>
+        </section>
+        <section>
+            <h3>Shadow DOM with no custom elements</h3>
+            <p id="el-id">Element with ID: 'el-id'</p>
+            <div id="shadow-root">
+                <p id="el-id">This declaration doesn't show on page. Have to use innerHTML?</p>
+            </div>
+        </section>
+        <section>
+            <h3>HTML templates only example</h3>
+            <template id="template-1">
+                This is the <span class="number-output"></span> item
+                with the value of <span class="value-output"></span>.<br>
+            </template>
+            <div id="template-output"></div>
+        </section>
+        <script src="./index.js"></script>
+    </body>
+</html>
