@@ -30,6 +30,13 @@
             </template>
             <div id="template-output"></div>
         </section>
+        <section>
+            <h3>Custom Element with Shadow DOM and slots</h3>
+            <custom-element2>
+                <slot><p>Wow such custom! but no shadow styles?!?!</p></slot>
+                <slot name="slots"><h4 style="color:green;">A second slot with different content differentiated by the name attribute and styles from light DOM</h4></slot>
+            </custom-element2>
+        </section>
         <script src="./index.js"></script>
     </body>
 </html>

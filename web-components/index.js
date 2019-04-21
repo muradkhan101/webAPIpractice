@@ -41,3 +41,27 @@ const template = document.getElementById('template-1');
     templateInstance.querySelector('.value-output').innerHTML = item.value;
     document.getElementById('template-output').appendChild(templateInstance);
 })
+
+class CustomElement2 extends HTMLElement {
+    constructor() {
+        super();
+        // If mode == 'closed', can't access shadow Root with this.shadowRoot
+        this.attachShadow({mode: 'open'});
+    }
+    connectedCallback() {
+        this.shadowRoot.innerHTML = `
+        <style>
+            p {
+                size: 2em;
+                color: blue;
+            }
+        </style>
+        <p>This is from a 'p' inside a custom element</p>
+        <p>The following is custom content passed through a slot:</p>
+        <slot></slot>
+        <slot name="slots"></slot>
+        `;
+    }
+}
+
+customElements.define('custom-element2', CustomElement2);
