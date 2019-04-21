@@ -61,7 +61,33 @@ class CustomElement2 extends HTMLElement {
         <slot></slot>
         <slot name="slots"></slot>
         `;
+        // Can query slot elements in shadow DOW
+        // console.log(this.querySelector('h4'));
     }
 }
 
 customElements.define('custom-element2', CustomElement2);
+
+class ThemeableElement extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({mode: 'open'});
+    }
+    connectedCallback() {
+        this.shadowRoot.innerHTML = `<slot part="theme"></slot>`;
+    }
+}
+
+customElements.define('themeable-element', ThemeableElement);
+
+class ThemeableElement2 extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+    }
+    connectedCallback() {
+        this.shadowRoot.innerHTML = `<slot part="theme"></slot>`;
+    }
+}
+
+customElements.define('themeable-element2', ThemeableElement2);

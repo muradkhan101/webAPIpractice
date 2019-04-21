@@ -33,9 +33,30 @@
         <section>
             <h3>Custom Element with Shadow DOM and slots</h3>
             <custom-element2>
-                <slot><p>Wow such custom! but no shadow styles?!?!</p></slot>
+                <slot><p>Wow such custom! but no shadow styles because they don't apply to slotted elements!!</p></slot>
                 <slot name="slots"><h4 style="color:green;">A second slot with different content differentiated by the name attribute and styles from light DOM</h4></slot>
             </custom-element2>
+        </section>
+        <section>
+            <h4>Theming with Web Components</h4>
+            <style>
+                /* "theme" works similary but applies to any element with the part attribute 
+                 * whereas part only applies to that specific element
+                */
+                themeable-element::part(theme) {
+                    color: orange;
+                    text-decoration: underline;
+                }
+                :root::theme(theme) {
+                    color: red;
+                }
+            </style>
+            <themeable-element>
+                <slot>This was themed from the outside using the 'part' attribute and 'part' and 'theme' CSS selector</slot>
+            </themeable-element>
+            <themeable-element2>
+                <slot>This was themed from the outside using the 'part' attribute and 'theme' CSS selector</slot>
+            </themeable-element2>
         </section>
         <script src="./index.js"></script>
     </body>
