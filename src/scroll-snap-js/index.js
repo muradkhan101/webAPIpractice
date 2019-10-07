@@ -32,7 +32,9 @@ function animatedScroll(el, from, to, time, dir = 'vertical') {
 function setUpScrollSnap(container, pos = 'start') {
     let count = 0;
     container.addEventListener('scroll', () => {
-        count = setTimeout(() => {
+        count++;
+        let ref = count;
+        setTimeout(() => {
             if (ref !== count) return;
             const scrollAmt = container.scrollTop;
             const children = container.children;
