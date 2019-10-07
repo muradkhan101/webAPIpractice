@@ -1,0 +1,128 @@
+<head>
+
+</head>
+<style>
+    body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .container {
+        display: flex;
+        flex-direction: column;
+        height: 300px;
+        width: 250px;
+        overflow: auto;
+        align-items: stretch;
+        /* scroll-snap-type: mandatory;
+        scroll-snap-type: both mandatory; */
+    }
+
+    .item {
+        flex-shrink: 0;
+        height: 300px;
+        width: 240px;
+        margin-right: 20px;
+        margin-bottom: 20px;
+        background: turquoise;
+        /* scroll-snap-align: center;
+        scroll-snap-stop: always; */
+    }
+
+    .item:nth-child(2) {
+        background: green;
+    }
+
+    .item:nth-child(3) {
+        background: orchid;
+    }
+
+    .item:nth-child(4) {
+        background: palegoldenrod;
+    }
+
+    .navigation {
+        display: flex;
+        margin-top: 12px;
+    }
+
+    .navigation .marker {
+        border-radius: 50%;
+        height: 16px;
+        width: 16px;
+        margin-right: 12px;
+        background: orange;
+    }
+
+    .navigation .marker.active {
+        background: red;
+    }
+</style>
+
+<body>
+    <div class="container">
+        <div class="item"></div>
+        <div class="item"></div>
+        <div class="item"></div>
+        <div class="item"></div>
+    </div>
+    <div class="navigation">
+
+    </div>
+</body>
+<script>
+    var itemCount = document.querySelectorAll('.item').length;
+    var container = document.querySelector('.container');
+    var navigation = document.querySelector('.navigation');
+    for (let i = 0; i < itemCount; i++) {
+        const marker = document.createElement('div');
+        marker.classList.add('marker');
+        navigation.appendChild(marker);
+    }
+    navigation.children[0].classList.add('active');
+
+    let count = 0;
+    container.addEventListener('scroll', () => {
+        count++;
+        let ref = count;
+        setTimeout(() => {
+            if (ref !== count) return;
+            const scrollAmt = container.scrollTop;
+            const children = container.children;
+            let width = 0;
+            for (let i = 0; i < children.length; i++) {
+                const child = children[i];
+                const lastWidth = width;
+                width += child.offsetHeight
+                    + (parseInt(getComputedStyle(child).marginBottom) || 0)
+                    + (parseInt(getComputedStyle(child).marginTop) || 0);
+                if (scrollAmt < (width + lastWidth) / 2) {
+                    Array.from(navigation.children).forEach(nChild => nChild.classList.remove('active'));
+                    navigation.children[i].classList.add('active');
+                    // child.scrollIntoView();
+                    animatedScrollTo(child.parentElement, scrollAmt, lastWidth, 250);
+                    break;
+                }
+            }
+        }, 50);
+
+    });
+    function animatedScrollTo(el, from, to, time) {
+        const startTime = Date.now();
+        const diff = to - from;
+        function scroll(at) {
+            const scrollLeft = to - at;
+            if (Math.abs(scrollLeft) < 1) return;
+            const timePassed = Date.now() - startTime;
+            const mult = Math.pow(Math.min(1, timePassed / time), 2);
+            // const mult = Math.min(1, Math.sqrt(timePassed / time));
+            const scrollDist = (from + mult * diff) - at;
+            el.scrollBy(0, scrollDist);
+            window.requestAnimationFrame(() => {
+                scroll((at + scrollDist));
+            });
+        }
+        scroll(from);
+    }
+</script>
